@@ -1,0 +1,17 @@
+{
+  "resource": "/preferences",
+  "path": "/preferences",
+  "httpMethod": "POST",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "resourcePath": "/preferences",
+    "httpMethod": "POST"
+  },
+  "body": "{\"Item\":{\"email\":{\"S\":\"khoojiaxiang4@gmail.com\"},\"protein\":{\"S\":\"fish\"},\"mainCarb\":{\"S\":\"noodles\"},\"taste\":{\"S\":\"sweet\"},\"budget\":{\"S\":\"3-5\"},\"dietaryType\":{\"S\":\"vegetarian\"}}}",
+  "isBase64Encoded": false
+}

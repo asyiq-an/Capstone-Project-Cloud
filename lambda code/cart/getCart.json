@@ -1,0 +1,16 @@
+{
+  "version": "2.0",
+  "routeKey": "GET /getCart",
+  "rawPath": "/getCart",
+  "rawQueryString": "user_id=nuruddinasyiq@gmail.com",
+  "queryStringParameters": {
+    "user_id": "nuruddinasyiq@gmail.com"
+  },
+  "requestContext": {
+    "http": {
+      "method": "GET",
+      "path": "/getCart"
+    }
+  },
+  "isBase64Encoded": false
+}
