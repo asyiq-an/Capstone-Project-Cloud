@@ -5,9 +5,7 @@ This folder contains the front-end source code for the project, responsible for 
 ## Technologies Used
 
 - HTML5, CSS3, JavaScript
-- Bootstrap 5 / Tailwind CSS (choose based on your stack)
-- React.js / Next.js (if applicable)
-- Axios or Fetch API for HTTP requests
+- React.js / Next.js
 
 ## Getting Started
 
@@ -29,6 +27,11 @@ npm install
 npm run dev
 ```
 
+```bash
+npm run build
+npm run start
+```
+
 Visit `http://localhost:3000` to view the UI.
 
 ## Features
@@ -37,26 +40,6 @@ Visit `http://localhost:3000` to view the UI.
 - Responsive design (mobile/tablet/desktop)
 - Input validation
 - API integration with Application Layer
-
-## Project Structure
-
-``` bash
-/presentation
-  /public
-  /src
-    /components
-    /pages
-    /assets
-  README.md
-```
-
-## Environment Variables
-
-Create a `.env.local` file with:
-
-``` bash
-NEXT_PUBLIC_API_URL=http://localhost:4000/api
-```
 
 ## Deployment
 

@@ -1,0 +1,100 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: rgb(247, 247, 247);
+  padding: 20px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 0px 24px 0px;
+  padding: 32px;
+}
+
+.login-title {
+  font-family: "PP Agrandir", sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 42px;
+  margin-bottom: 24px;
+  text-align: center;
+  color: rgb(23, 31, 38);
+}
+
+.login-form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  color: rgb(112, 112, 112);
+}
+
+.form-input {
+  width: 100%;
+  height: 48px;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid rgb(220, 220, 220);
+  font-size: 14px;
+  font-family: "Open Sans", sans-serif;
+}
+
+.error-message {
+  color: rgb(226, 27, 112);
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.login-button {
+  width: 100%;
+  height: 48px;
+  background-color: rgb(226, 27, 112);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.signup-text {
+  text-align: center;
+  margin-top: 24px;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  color: rgb(112, 112, 112);
+}
+
+.signup-link {
+  color: rgb(226, 27, 112);
+  text-decoration: none;
+}
+
+.signup-link:hover {
+  text-decoration: underline;
+}
