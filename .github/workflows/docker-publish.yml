@@ -2,7 +2,7 @@ name: Build and Push to Docker Hub
 
 on:
   push:
-    branches: [ "testing-CI/CD" ] # Change to 'main' when you're ready for production
+    branches: [ "main" ] # Change to 'main' when you're ready for production
   workflow_dispatch:
 
 env:
