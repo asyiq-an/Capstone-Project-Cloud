@@ -2,9 +2,7 @@ name: Build and Push to Docker Hub
 
 on:
   push:
-    branches:
-      - testing-CI/CD  # Change to 'main' when you're ready for production
-
+    branches: [ "testing-CI/CD" ] # Change to 'main' when you're ready for production
 env:
   IMAGE_NAME: asyiqan/np-snatch
 
