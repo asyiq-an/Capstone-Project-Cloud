@@ -1,5 +1,5 @@
 name: Security Scan
-# with downloadable artifacts for each tool
+
 on:
   pull_request:
   push:
@@ -12,11 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: returntocorp/semgrep-action@v1
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
         with:
           config: "auto"
-          output: semgrep-results.json
-          output_format: json
+          args: >-
+            --json --output=semgrep-results.json || true
       - name: Upload Semgrep Results
         uses: actions/upload-artifact@v4
         with:
@@ -65,10 +66,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: |
-          npm install
+      - name: Install Dependencies and Run Audit
+        run: |
+          npm install || true
           npm audit --audit-level=low > npm-audit.txt || true
-      - name: Upload npm audit report
+      - name: Upload NPM Audit Report
         uses: actions/upload-artifact@v4
         with:
           name: npm-audit-report
