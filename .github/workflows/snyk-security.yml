@@ -1,16 +1,100 @@
-name: Snyk example
-on: push
-# I alone am the honoured one
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# This comprehensive workflow sets up Snyk to analyze various asset types (Container,
+# Infrastructure as Code, Code, and Open Source) found in the repository.
+#
+# The setup installs the Snyk CLI - for more details on the possible commands
+# check https://docs.snyk.io/snyk-cli/cli-reference
+# Snyk Code and Container results are uploaded to GitHub Security Code Scanning in SARIF format.
+#
+# To use the Snyk Action, you will need a Snyk API token and Organization ID
+# stored as GitHub Repository Secrets:
+#   - SNYK_TOKEN: Your Snyk API Token (e.g., 7f81be86-...)
+#   - SNYK_ORG_ID: Your Snyk Organization ID (e.g., be36fa65-...)
+#
+# For more examples and detailed documentation, refer to:
+#   - https://github.com/snyk/actions
+#   - https://docs.snyk.io/
+
+name: Snyk Security Full Scan
+
+on:
+  push:
+    branches: ["main" ]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
 jobs:
-  security:
+  snyk:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - uses: snyk/actions/setup@master
-      - uses: actions/setup-go@v1
-        with:
-          go-version: '1.19'
-      - name: Snyk test
-        run: snyk test
+      - uses: actions/checkout@v4
+
+      # Set up Snyk CLI
+      - name: Set up Snyk CLI
+        uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          DEBUG: snyk:* # Keep this for detailed Snyk logs if needed
+
+      # Set up Node.js for 'presentation/package.json' and potential Snyk Code for Node.js
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20 # Or specify the Node.js version your 'presentation' project uses
+
+      # --- Snyk Scans ---
+
+      # 1. Snyk Code (SAST) - Targets code analysis across the repository
+      #    Outputs SARIF for GitHub Code Scanning
+      - name: Snyk Code test
+        run: snyk code test --sarif --org=${{ secrets.SNYK_ORG_ID }} > snyk-code.sarif || true
+        # `|| true` ensures SARIF upload happens even if vulnerabilities are found
+
+      # 2. Snyk Open Source (SCA) - Targets 'presentation/package.json' for dependencies
+      #    Uses 'monitor' to continuously track dependencies in Snyk
+      - name: Snyk Open Source monitor (presentation/package.json)
+        run: snyk monitor --file=presentation/package.json --org=${{ secrets.SNYK_ORG_ID }}
+
+      # 3. Snyk Infrastructure as Code (IaC) - Targets Terraform and Kubernetes YAML files
+      #    Uses 'test' to find issues in IaC files. Adjust paths as needed.
+      #    Using --all-projects might be better here depending on how granular you want it.
+      - name: Snyk IaC test and report
+        run: |
+          snyk iac test --report --org=${{ secrets.SNYK_ORG_ID }} terraform/apigateway-and-lambda || true
+          snyk iac test --report --org=${{ secrets.SNYK_ORG_ID }} terraform/eks-auto-mode || true
+          snyk iac test --report --org=${{ secrets.SNYK_ORG_ID }} terraform/fargate || true
+          # Add more explicit paths if needed, or use 'snyk iac test --report --all-projects --org=...' for all supported IaC files
+        # `|| true` ensures the step doesn't fail the workflow if IaC issues are found.
+
+      # 4. Snyk Container - Targets 'dockerfile/Dockerfile'
+      #    Builds the Docker image first, then scans it. Outputs SARIF for Code Scanning.
+      - name: Build Docker image for scanning
+        run: docker build -t capstone-project-image -f dockerfile/Dockerfile .
+      - name: Snyk Container test (dockerfile/Dockerfile)
+        run: snyk container test capstone-project-image --file=dockerfile/Dockerfile --sarif --org=${{ secrets.SNYK_ORG_ID }} > snyk-container.sarif || true
+        # `|| true` ensures SARIF upload happens even if vulnerabilities are found
+
+      # --- Upload Results to GitHub Code Scanning ---
+
+      # Upload Snyk Code results
+      - name: Upload Snyk Code results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-code.sarif
+
+      # Upload Snyk Container results
+      - name: Upload Snyk Container results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: snyk-container.sarif
