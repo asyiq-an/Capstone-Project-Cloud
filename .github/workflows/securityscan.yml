@@ -1,5 +1,5 @@
 name: Security Scan
-
+# Test 4
 on:
   pull_request:
   push:
@@ -16,13 +16,11 @@ jobs:
         uses: returntocorp/semgrep-action@v1
         with:
           config: "auto"
-          args: >-
-            --json --output=semgrep-results.json || true
       - name: Upload Semgrep Results
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-results
-          path: semgrep-results.json
+          path: semgrep.sarif
 
   sca:
     name: Grype + Syft (SCA & SBOM)
@@ -34,7 +32,7 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
       - name: Generate SBOM
-        run: syft dir:. -o json > sbom.json
+        run: syft . -o json > sbom.json
       - name: Scan SBOM with Grype
         run: grype sbom:sbom.json -o table > grype-report.txt || true
       - name: Upload SBOM and Grype Report
@@ -66,10 +64,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install Dependencies and Run Audit
+      - name: Run npm audit from 'presentation' directory
+        working-directory: presentation
         run: |
           npm install || true
-          npm audit --audit-level=low > npm-audit.txt || true
+          npm audit --audit-level=low > ../npm-audit.txt || true
       - name: Upload NPM Audit Report
         uses: actions/upload-artifact@v4
         with:
