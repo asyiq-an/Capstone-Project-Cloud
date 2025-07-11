@@ -57,6 +57,7 @@ jobs:
             # mandatory
             -Dsonar.projectKey=np-cloud-79_Capstone-Project-Cloud
             -Dsonar.organization=np-cloud-79
+            -Dsonar.scm.provider=git
             # Comma-separated paths to directories containing main source files.
             #-Dsonar.sources= # optional, default is project base directory
             # Comma-separated paths to directories containing test source files.
