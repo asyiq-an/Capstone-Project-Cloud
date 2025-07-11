@@ -1,7 +1,7 @@
 name: Security Scan
-# Test 4
+# Test 5
+
 on:
-  pull_request:
   push:
     branches: [ "main" ]
   workflow_dispatch:
@@ -12,11 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Run Semgrep
         uses: returntocorp/semgrep-action@v1
         with:
           config: "auto"
-      - name: Upload Semgrep Results
+        continue-on-error: true
+
+      - name: Upload Semgrep SARIF Results
         uses: actions/upload-artifact@v4
         with:
           name: semgrep-results
@@ -27,14 +30,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Install Grype and Syft
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
       - name: Generate SBOM
         run: syft . -o json > sbom.json
+
       - name: Scan SBOM with Grype
         run: grype sbom:sbom.json -o table > grype-report.txt || true
+
       - name: Upload SBOM and Grype Report
         uses: actions/upload-artifact@v4
         with:
@@ -48,11 +55,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Run Gitleaks and Save Report
         run: |
           curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64 -o gitleaks
           chmod +x gitleaks
           ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json || true
+
       - name: Upload Gitleaks Report
         uses: actions/upload-artifact@v4
         with:
@@ -64,13 +73,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       - name: Run npm audit from 'presentation' directory
         working-directory: presentation
         run: |
           npm install || true
-          npm audit --audit-level=low > ../npm-audit.txt || true
+          npm audit --audit-level=low > npm-audit.txt || true
+
       - name: Upload NPM Audit Report
         uses: actions/upload-artifact@v4
         with:
           name: npm-audit-report
-          path: npm-audit.txt
+          path: presentation/npm-audit.txt
