@@ -1,0 +1,75 @@
+name: Security Scan
+# with downloadable artifacts for each tool
+on:
+  pull_request:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  sast:
+    name: Semgrep (SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: returntocorp/semgrep-action@v1
+        with:
+          config: "auto"
+          output: semgrep-results.json
+          output_format: json
+      - name: Upload Semgrep Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: semgrep-results.json
+
+  sca:
+    name: Grype + Syft (SCA & SBOM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Grype and Syft
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+      - name: Generate SBOM
+        run: syft dir:. -o json > sbom.json
+      - name: Scan SBOM with Grype
+        run: grype sbom:sbom.json -o table > grype-report.txt || true
+      - name: Upload SBOM and Grype Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-sbom-reports
+          path: |
+            sbom.json
+            grype-report.txt
+
+  secrets:
+    name: Gitleaks (Secret Scanning)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Gitleaks and Save Report
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64 -o gitleaks
+          chmod +x gitleaks
+          ./gitleaks detect --source . --report-format json --report-path gitleaks-report.json || true
+      - name: Upload Gitleaks Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+
+  npm-audit:
+    name: NPM Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          npm install
+          npm audit --audit-level=low > npm-audit.txt || true
+      - name: Upload npm audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit.txt
