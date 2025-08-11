@@ -1,4 +1,4 @@
-name: Build and Push to Docker Hub & AWS ECR
+name: Build, Push to Docker Hub & AWS ECR, Deploy to All ECS Services
 
 on:
   push:
@@ -9,24 +9,28 @@ env:
   IMAGE_NAME: asyiqan/np-snatch
   AWS_REGION: us-east-1
   AWS_ECR_REPO: 024196846829.dkr.ecr.us-east-1.amazonaws.com/asyiq-an/np-snatch
+  ECS_CLUSTER: alert-koala-5ffh6c
+  ECS_TASK_DEFINITION: npsnatch
+  CONTAINER_NAME: npsnatch
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Log in to Docker Hub
+      # Login to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Docker info (debug)
-        run: docker info
 
       # Configure AWS credentials
       - name: Configure AWS credentials
@@ -45,20 +49,63 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build Docker image
-      - name: Build Docker image and tag
+      # Build and push to both registries
+      - name: Build and push Docker image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
         run: |
+          # Build image
           docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
 
-      # Push to Docker Hub
-      - name: Push to Docker Hub
-        run: |
+          # Push to Docker Hub
           docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:$IMAGE_TAG
 
-      # Push to AWS ECR
-      - name: Push to AWS ECR
-        run: |
+          # Tag for ECR
           docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:latest
-          docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:${{ github.sha }}
+          docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:$IMAGE_TAG
+
+          # Push to ECR
           docker push $AWS_ECR_REPO:latest
-          docker push $AWS_ECR_REPO:${{ github.sha }}
+          docker push $AWS_ECR_REPO:$IMAGE_TAG
+
+      # Deploy to all ECS services
+      - name: Deploy new image to all ECS services in cluster
+        env:
+          NEW_IMAGE: ${{ env.AWS_ECR_REPO }}:${{ github.sha }}
+        run: |
+          SERVICES=$(aws ecs list-services --cluster $ECS_CLUSTER --query 'serviceArns[]' --output text)
+
+          for SERVICE_ARN in $SERVICES; do
+            SERVICE_NAME=$(basename $SERVICE_ARN)
+            echo "Deploying new image to service: $SERVICE_NAME"
+
+            # Get current task definition
+            CURRENT_TASK_DEF=$(aws ecs describe-services \
+              --cluster $ECS_CLUSTER \
+              --services $SERVICE_NAME \
+              --query 'services[0].taskDefinition' \
+              --output text)
+
+            # Create new task definition revision with updated image
+            NEW_TASK_DEF=$(aws ecs register-task-definition \
+              --cli-input-json "$(aws ecs describe-task-definition \
+                --task-definition $CURRENT_TASK_DEF \
+                --query 'taskDefinition' \
+                --output json \
+                | jq --arg IMAGE "$NEW_IMAGE" \
+                     --arg CONTAINER "$CONTAINER_NAME" \
+                     '.containerDefinitions |= map(if .name == $CONTAINER then .image = $IMAGE else . end)')" \
+              --query 'taskDefinition.taskDefinitionArn' \
+              --output text)
+
+            # Update service with new task definition
+            aws ecs update-service \
+              --cluster $ECS_CLUSTER \
+              --service $SERVICE_NAME \
+              --task-definition $NEW_TASK_DEF \
+              --force-new-deployment
+
+            echo "✅ Updated service $SERVICE_NAME with image $NEW_IMAGE"
+          done
