@@ -9,7 +9,7 @@ env:
   # AWS & CloudFormation
   AWS_REGION: us-east-1
   CF_STACK_NAME: my-ecs-env
-  CF_TEMPLATE_PATH: infrastructure/the.yaml
+  CF_TEMPLATE_PATH: infrastructure/IaCfor.yaml
   ECR_REPOSITORY_NAME: asyiqan/np-snatch  # must match EcrRepositoryName default or parameter in template
 
   # Docker Hub
