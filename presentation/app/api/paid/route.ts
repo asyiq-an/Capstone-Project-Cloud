@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const apiUrl = `https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/GetPaidItems?order_id=${orderId}`; // Replace with your actual endpoint
+    const apiUrl = `https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/payment?order_id=${orderId}`; // Replace with your actual endpoint
 
     const lambdaResponse = await fetch(apiUrl);
 

@@ -2,7 +2,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const res = await fetch("https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/checksession", {
+    const res = await fetch("https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checksession", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -22,4 +22,3 @@ export async function POST(req: Request) {
     });
   }
 }
-

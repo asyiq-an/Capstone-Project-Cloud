@@ -1,3 +1,4 @@
+
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -11,7 +12,7 @@ export async function GET() {
 
   try {
     const sessionRes = await fetch(
-      "https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/checksession",
+      "https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checksession",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,7 +28,7 @@ export async function GET() {
     const email = user.email;
 
     const cartRes = await fetch(
-      `https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/cart?user_id=${email}`
+      `https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/getcart?user_id=${email}`
     );
 
     if (!cartRes.ok) {
@@ -43,4 +44,4 @@ export async function GET() {
   }
 }
 
-// asyiq
+// asyiq 

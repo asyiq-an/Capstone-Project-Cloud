@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const sessionId = uuidv4();
 
   // Call Lambda with credentials and the new sessionId
-  const lambdaResponse = await fetch('https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/login', {
+  const lambdaResponse = await fetch('https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

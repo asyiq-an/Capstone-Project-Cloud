@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'sessionId is required' }, { status: 400 });
   }
 
-  const res = await fetch('https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/checksession', {
+  const res = await fetch('https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checksession', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ sessionId }),

@@ -62,7 +62,7 @@ const SignupForm: React.FC = () => {
 
   setIsSubmitting(true);
   try {
-    const response = await fetch("https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/signuppage", {
+    const response = await fetch("https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/signup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
