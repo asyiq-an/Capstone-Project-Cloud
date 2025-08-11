@@ -2,11 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: >
   VPC, Subnets, Security Group, ECS Cluster, Task Definition, and
   Fargate Service. Parameterized to update container image via CloudFormation.
+  Uses pre-existing ECR repository and LabRole as ECS execution role.
 
 Parameters:
   ImageUri:
     Type: String
-    Description: Full URI of the container image (e.g., 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest)
+    Description: Full URI of the container image (e.g., 384191713250.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest)
 
 Resources:
 
@@ -102,7 +103,7 @@ Resources:
     Properties:
       ClusterName: LabFargateCluster
 
-  # ECS Task Definition (parameterized image)
+  # ECS Task Definition (using LabRole as execution role)
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -112,6 +113,7 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
+      ExecutionRoleArn: arn:aws:iam::384191713250:role/LabRole
       ContainerDefinitions:
         - Name: sample-container
           Image: !Ref ImageUri
