@@ -1,7 +1,8 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  VPC, Subnets, Security Group, ECS Cluster, Task Definition, and
-  Fargate Service. Parameterized to update container image via CloudFormation.
+  VPC, Subnets, Security Group, ECS Cluster, Task Definition,
+  Fargate Service, and ALB with Target Group and Listener.
+  Parameterized to update container image via CloudFormation.
   Uses pre-existing ECR repository and LabRole as ECS execution role.
 
 Parameters:
@@ -11,7 +12,9 @@ Parameters:
 
 Resources:
 
+  # --------------------------
   # Networking
+  # --------------------------
   VPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -85,11 +88,13 @@ Resources:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
 
-  # Security Group
-  ECSServiceSecurityGroup:
+  # --------------------------
+  # Security Groups
+  # --------------------------
+  ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow HTTP inbound to ECS service
+      GroupDescription: Allow HTTP inbound to ALB
       VpcId: !Ref VPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -97,13 +102,66 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
-  # ECS Cluster
+  ECSServiceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow inbound from ALB to ECS tasks
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
+
+  # --------------------------
+  # ALB + Target Group + Listener
+  # --------------------------
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: LabALB
+      Subnets:
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: '60'
+      Type: application
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: LabECSTargetGroup
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VPC
+      HealthCheckPath: /
+      HealthCheckIntervalSeconds: 30
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+
+  ALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  # --------------------------
+  # ECS Cluster + Task Definition + Service
+  # --------------------------
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: LabFargateCluster
 
-  # ECS Task Definition (using LabRole as execution role)
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
@@ -122,9 +180,9 @@ Resources:
             - ContainerPort: 80
               Protocol: tcp
 
-  # ECS Fargate Service
   FargateService:
     Type: AWS::ECS::Service
+    DependsOn: ALBListener
     Properties:
       Cluster: !Ref ECSCluster
       ServiceName: LabFargateService
@@ -139,6 +197,10 @@ Resources:
             - !Ref PublicSubnet2
           SecurityGroups:
             - !Ref ECSServiceSecurityGroup
+      LoadBalancers:
+        - TargetGroupArn: !Ref TargetGroup
+          ContainerName: sample-container
+          ContainerPort: 80
 
 Outputs:
   VPCId:
@@ -160,3 +222,7 @@ Outputs:
   FargateServiceName:
     Description: ECS Fargate Service Name
     Value: !Ref FargateService
+
+  ALBEndpoint:
+    Description: ALB DNS endpoint
+    Value: !GetAtt ALB.DNSName
