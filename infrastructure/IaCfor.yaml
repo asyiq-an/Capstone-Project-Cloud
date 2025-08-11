@@ -1,17 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: >
-  VPC, Subnets, Security Group, ECR Repository, ECS Cluster, Task Definition, and
+  VPC, Subnets, Security Group, ECS Cluster, Task Definition, and
   Fargate Service. Parameterized to update container image via CloudFormation.
 
 Parameters:
   ImageUri:
     Type: String
     Description: Full URI of the container image (e.g., 123456789012.dkr.ecr.us-east-1.amazonaws.com/my-repo:latest)
-
-  EcrRepositoryName:
-    Type: String
-    Default: lab-sample-repo
-    Description: Name of the ECR repository to create
 
 Resources:
 
@@ -101,31 +96,6 @@ Resources:
           ToPort: 80
           CidrIp: 0.0.0.0/0
 
-  # ECR Repository
-  EcrRepository:
-    Type: AWS::ECR::Repository
-    Properties:
-      RepositoryName: !Ref EcrRepositoryName
-      ImageScanningConfiguration:
-        ScanOnPush: true
-      LifecyclePolicy:
-        LifecyclePolicyText: |
-          {
-            "rules": [
-              {
-                "rulePriority": 1,
-                "description": "Expire untagged images after 30 days",
-                "selection": {
-                  "tagStatus": "untagged",
-                  "countType": "sinceImagePushed",
-                  "countUnit": "days",
-                  "countNumber": 30
-                },
-                "action": { "type": "expire" }
-              }
-            ]
-          }
-
   # ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -188,7 +158,3 @@ Outputs:
   FargateServiceName:
     Description: ECS Fargate Service Name
     Value: !Ref FargateService
-
-  EcrRepositoryUri:
-    Description: URI of the created ECR repository
-    Value: !GetAtt EcrRepository.RepositoryUri
