@@ -25,6 +25,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Docker info (debug)
+        run: docker info
+
+
       # Configure AWS credentials including session token
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -47,8 +51,6 @@ jobs:
         run: |
           docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
-          docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:latest
-          docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:${{ github.sha }}
 
       # Push images to Docker Hub
       - name: Push to Docker Hub
@@ -59,5 +61,7 @@ jobs:
       # Push images to AWS ECR
       - name: Push to AWS ECR
         run: |
+          docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:latest
+          docker tag $IMAGE_NAME:latest $AWS_ECR_REPO:${{ github.sha }}
           docker push $AWS_ECR_REPO:latest
           docker push $AWS_ECR_REPO:${{ github.sha }}
