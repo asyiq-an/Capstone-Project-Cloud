@@ -1,36 +1,95 @@
-name: Build and Push to Docker Hub
+name: Build, Push, and Deploy
 
 on:
   push:
-    branches: [ "main" ] # Change to 'main' when you're ready for production
+    branches: [ "main" ]
   workflow_dispatch:
 
 env:
+  # Docker Hub
   IMAGE_NAME: asyiqan/np-snatch
 
+  # AWS/ECS
+  AWS_REGION: MY_AWS_REGION                   # e.g. us-west-1
+  ECR_REPOSITORY: MY_ECR_REPOSITORY           # Amazon ECR repo name
+  ECS_SERVICE: MY_ECS_SERVICE                 # Amazon ECS service name
+  ECS_CLUSTER: MY_ECS_CLUSTER                 # Amazon ECS cluster name
+  ECS_TASK_DEFINITION: MY_ECS_TASK_DEFINITION # path to ECS task definition JSON file
+  CONTAINER_NAME: MY_CONTAINER_NAME           # container name in ECS task definition
+
+permissions:
+  contents: read
+
 jobs:
-  build-and-push:
+  build-push-deploy:
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ---- Login to Docker Hub ----
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # ---- Set up Docker Buildx ----
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
-        run: |
-          docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
-          docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
+      # ---- Configure AWS credentials ----
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Push to Docker Hub
+      # ---- Login to Amazon ECR ----
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # ---- Build and push images ----
+      - name: Build and push Docker images
+        id: build-images
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
         run: |
+          # Build for Docker Hub
+          docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+          
+          # Push to Docker Hub
           docker push $IMAGE_NAME:latest
-          docker push $IMAGE_NAME:${{ github.sha }}
+          docker push $IMAGE_NAME:$IMAGE_TAG
+          
+          # Tag for ECR
+          docker tag $IMAGE_NAME:latest $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+          # Push to ECR
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # ---- Update ECS task definition ----
+      - name: Fill in the new image ID in ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-images.outputs.image }}
+
+      # ---- Deploy to ECS ----
+      - name: Deploy ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
