@@ -76,6 +76,19 @@ jobs:
 
           echo "image_uri=$ECR_IMAGE_URI" >> $GITHUB_OUTPUT
 
+      - name: Delete ROLLBACK_COMPLETE stack if exists
+        run: |
+          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "NOT_FOUND")
+          if [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
+            echo "Stack is in ROLLBACK_COMPLETE state, deleting stack..."
+            aws cloudformation delete-stack --stack-name $CF_STACK_NAME
+            echo "Waiting for stack deletion to complete..."
+            aws cloudformation wait stack-delete-complete --stack-name $CF_STACK_NAME
+            echo "Stack deleted."
+          else
+            echo "Stack status is $STACK_STATUS, no deletion needed."
+          fi
+
       - name: Deploy CloudFormation stack with new image
         run: |
           aws cloudformation deploy \
