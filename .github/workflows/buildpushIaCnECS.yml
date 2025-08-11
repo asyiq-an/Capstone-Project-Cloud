@@ -6,13 +6,10 @@ on:
   workflow_dispatch:
 
 env:
-  # AWS & CloudFormation
   AWS_REGION: us-east-1
   CF_STACK_NAME: my-ecs-env
-  CF_TEMPLATE_PATH: infrastructure/the.yaml
-  ECR_REPOSITORY_NAME: asyiqan/np-snatch  # must match EcrRepositoryName default or parameter in template
-
-  # Docker Hub
+  CF_TEMPLATE_PATH: infrastructure/IaCfor.yaml
+  ECR_REPOSITORY_NAME: asyiqan/np-snatch
   IMAGE_NAME: asyiqan/np-snatch
 
 permissions:
@@ -32,6 +29,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Ensure ECR repository exists
@@ -43,7 +41,6 @@ jobs:
             echo "ECR repository ${ECR_REPOSITORY_NAME} already exists."
           fi
 
-      # Docker Hub login
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -68,16 +65,29 @@ jobs:
           echo "Building image..."
           docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
+          docker tag $IMAGE_NAME:latest $ECR_IMAGE_URI
 
           echo "Pushing to Docker Hub..."
           docker push $IMAGE_NAME:latest
           docker push $IMAGE_NAME:$IMAGE_TAG
 
-          echo "Tagging and pushing to ECR..."
-          docker tag $IMAGE_NAME:latest $ECR_IMAGE_URI
+          echo "Pushing to ECR..."
           docker push $ECR_IMAGE_URI
 
           echo "image_uri=$ECR_IMAGE_URI" >> $GITHUB_OUTPUT
+
+      - name: Delete ROLLBACK_COMPLETE stack if exists
+        run: |
+          STACK_STATUS=$(aws cloudformation describe-stacks --stack-name $CF_STACK_NAME --query "Stacks[0].StackStatus" --output text 2>/dev/null || echo "NOT_FOUND")
+          if [ "$STACK_STATUS" == "ROLLBACK_COMPLETE" ]; then
+            echo "Stack is in ROLLBACK_COMPLETE state, deleting stack..."
+            aws cloudformation delete-stack --stack-name $CF_STACK_NAME
+            echo "Waiting for stack deletion to complete..."
+            aws cloudformation wait stack-delete-complete --stack-name $CF_STACK_NAME
+            echo "Stack deleted."
+          else
+            echo "Stack status is $STACK_STATUS, no deletion needed."
+          fi
 
       - name: Deploy CloudFormation stack with new image
         run: |
@@ -85,8 +95,6 @@ jobs:
             --template-file "${CF_TEMPLATE_PATH}" \
             --stack-name "${CF_STACK_NAME}" \
             --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM \
-            --parameter-overrides \
-              ImageUri=${{ steps.build-images.outputs.image_uri }} \
-              EcrRepositoryName=${ECR_REPOSITORY_NAME} \
+            --parameter-overrides ImageUri=${{ steps.build-images.outputs.image_uri }} \
             --region "${AWS_REGION}" \
             --no-fail-on-empty-changeset
