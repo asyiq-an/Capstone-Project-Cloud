@@ -70,7 +70,6 @@ jobs:
           docker push $AWS_ECR_REPO:latest
           docker push $AWS_ECR_REPO:$IMAGE_TAG
 
-      # Deploy to all ECS services
       - name: Deploy new image to all ECS services in cluster
         env:
           NEW_IMAGE: ${{ env.AWS_ECR_REPO }}:${{ github.sha }}
@@ -81,26 +80,30 @@ jobs:
             SERVICE_NAME=$(basename $SERVICE_ARN)
             echo "Deploying new image to service: $SERVICE_NAME"
 
-            # Get current task definition
             CURRENT_TASK_DEF=$(aws ecs describe-services \
               --cluster $ECS_CLUSTER \
               --services $SERVICE_NAME \
               --query 'services[0].taskDefinition' \
               --output text)
 
-            # Create new task definition revision with updated image
-            NEW_TASK_DEF=$(aws ecs register-task-definition \
-              --cli-input-json "$(aws ecs describe-task-definition \
-                --task-definition $CURRENT_TASK_DEF \
-                --query 'taskDefinition' \
-                --output json \
-                | jq --arg IMAGE "$NEW_IMAGE" \
-                     --arg CONTAINER "$CONTAINER_NAME" \
-                     '.containerDefinitions |= map(if .name == $CONTAINER then .image = $IMAGE else . end)')" \
-              --query 'taskDefinition.taskDefinitionArn' \
-              --output text)
+            NEW_TASK_DEF=$(aws ecs describe-task-definition \
+              --task-definition $CURRENT_TASK_DEF \
+              --query 'taskDefinition' \
+              --output json | \
+              jq 'del(
+                .taskDefinitionArn,
+                .revision,
+                .status,
+                .requiresAttributes,
+                .compatibilities,
+                .registeredAt,
+                .registeredBy
+              ) | .containerDefinitions |= map(
+                if .name == "'"$CONTAINER_NAME"'" then .image = "'"$NEW_IMAGE"'" else . end
+              )' | \
+              aws ecs register-task-definition --cli-input-json file:///dev/stdin \
+              --query 'taskDefinition.taskDefinitionArn' --output text)
 
-            # Update service with new task definition
             aws ecs update-service \
               --cluster $ECS_CLUSTER \
               --service $SERVICE_NAME \
@@ -109,3 +112,4 @@ jobs:
 
             echo "✅ Updated service $SERVICE_NAME with image $NEW_IMAGE"
           done
+
