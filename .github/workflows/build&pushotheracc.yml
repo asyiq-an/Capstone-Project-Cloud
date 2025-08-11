@@ -86,24 +86,29 @@ jobs:
               --query 'services[0].taskDefinition' \
               --output text)
 
-            NEW_TASK_DEF=$(aws ecs describe-task-definition \
+            # Get the task definition JSON and remove unwanted fields, update image
+            aws ecs describe-task-definition \
               --task-definition $CURRENT_TASK_DEF \
               --query 'taskDefinition' \
               --output json | \
-              jq 'del(
-                .taskDefinitionArn,
-                .revision,
-                .status,
-                .requiresAttributes,
-                .compatibilities,
-                .registeredAt,
-                .registeredBy
-              ) | .containerDefinitions |= map(
-                if .name == "'"$CONTAINER_NAME"'" then .image = "'"$NEW_IMAGE"'" else . end
-              )' | \
-              aws ecs register-task-definition --cli-input-json file:///dev/stdin \
+            jq 'del(
+              .taskDefinitionArn,
+              .revision,
+              .status,
+              .requiresAttributes,
+              .compatibilities,
+              .registeredAt,
+              .registeredBy
+            ) | .containerDefinitions |= map(
+              if .name == "'"$CONTAINER_NAME"'" then .image = "'"$NEW_IMAGE"'" else . end
+            )' > new-task-def.json
+
+            # Register new task definition using the temp JSON file
+            NEW_TASK_DEF=$(aws ecs register-task-definition \
+              --cli-input-json file://new-task-def.json \
               --query 'taskDefinition.taskDefinitionArn' --output text)
 
+            # Update the service with the new task definition ARN
             aws ecs update-service \
               --cluster $ECS_CLUSTER \
               --service $SERVICE_NAME \
@@ -112,4 +117,3 @@ jobs:
 
             echo "✅ Updated service $SERVICE_NAME with image $NEW_IMAGE"
           done
-
