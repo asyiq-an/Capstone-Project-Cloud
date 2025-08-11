@@ -80,4 +80,14 @@ jobs:
 
           echo "image_uri=$ECR_IMAGE_URI" >> $GITHUB_OUTPUT
 
-      - name: Deploy CloudFor
+      - name: Deploy CloudFormation stack with new image
+        run: |
+          aws cloudformation deploy \
+            --template-file "${CF_TEMPLATE_PATH}" \
+            --stack-name "${CF_STACK_NAME}" \
+            --capabilities CAPABILITY_NAMED_IAM CAPABILITY_IAM \
+            --parameter-overrides \
+              ImageUri=${{ steps.build-images.outputs.image_uri }} \
+              EcrRepositoryName=${ECR_REPOSITORY_NAME} \
+            --region "${AWS_REGION}" \
+            --no-fail-on-empty-changeset
