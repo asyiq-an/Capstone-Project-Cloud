@@ -64,7 +64,7 @@ jobs:
 
           echo "Building image..."
           docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
-          docker tag $IMAGE_NAME:latest $IMAGE_TAG
+          docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_TAG
           docker tag $IMAGE_NAME:latest $ECR_IMAGE_URI
 
           echo "Pushing to Docker Hub..."
