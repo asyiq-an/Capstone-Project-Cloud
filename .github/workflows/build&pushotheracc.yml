@@ -1,14 +1,13 @@
-name: Build and Push to Docker Hub & AWS ECR
+
+name: Build and Push to Docker Hub
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main" ] # Change to 'main' when you're ready for production
   workflow_dispatch:
 
 env:
   IMAGE_NAME: asyiqan/np-snatch
-  AWS_REGION: us-east-1
-  AWS_ECR_REPO: 024196846829.dkr.ecr.us-east-1.amazonaws.com/asyiq-an/np-snatch
 
 jobs:
   build-and-push:
@@ -31,7 +30,6 @@ jobs:
         run: |
           docker build -f dockerfile/Dockerfile -t $IMAGE_NAME:latest .
           docker tag $IMAGE_NAME:latest $IMAGE_NAME:${{ github.sha }}
-
       - name: Push to Docker Hub
         run: |
           docker push $IMAGE_NAME:latest
