@@ -18,7 +18,7 @@ export default function NavBar() {
             />
           </div>
           <span className="text-white font-bold text-xl hidden sm:inline">
-            NP SNATCH
+            NP SNATCH v1
           </span>
         </Link>
 
