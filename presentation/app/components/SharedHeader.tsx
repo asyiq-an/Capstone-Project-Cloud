@@ -77,7 +77,7 @@ export default function SharedHeader() {
             height={40}
             className="rounded"
           />
-          <span className="text-xl font-bold text-pink-600">NP Snatch v1</span>
+          <span className="text-xl font-bold text-pink-600">NP Snatch v2</span>
         </div>
       </Link>
 
