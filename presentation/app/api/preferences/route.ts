@@ -56,9 +56,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 const CHECK_SESSION_URL =
-  "https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checksession";
+  "https://lmhwf7frja.execute-api.us-east-1.amazonaws.com/default/checksession";
 const SAVE_PREFS_URL =
-  "https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/save-preference";
+  "https://3foh5hnal5.execute-api.us-east-1.amazonaws.com/default/savepref";
 
 export async function POST(req: Request) {
   const c = cookies() as any;

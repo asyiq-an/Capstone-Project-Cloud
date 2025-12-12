@@ -12,7 +12,7 @@ export async function POST() {
   try {
     // Step 1: Validate session and get email
     const sessionRes = await fetch(
-      'https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checksession',
+      'https://lmhwf7frja.execute-api.us-east-1.amazonaws.com/default/checksession',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,7 +29,7 @@ export async function POST() {
 
     // Step 2: Call API Gateway to clear user's cart by email
     const clearRes = await fetch(
-      `https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/clearcart`,
+      `https://jvlh6lxf4m.execute-api.us-east-1.amazonaws.com/default/clearcart`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

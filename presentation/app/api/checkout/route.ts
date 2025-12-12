@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Forward to your lambda API gateway URL
-    const apiUrl = "https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checkout";
+    const apiUrl = "https://fo54eagvh4.execute-api.us-east-1.amazonaws.com/default/checkout";
 
     const apiRes = await fetch(apiUrl, {
       method: "POST",

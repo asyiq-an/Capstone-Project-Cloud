@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
   const { email } = await request.json();
 
   try {
-    const response = await fetch('https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/logout', {
+    const response = await fetch('https://ctxc54zlmi.execute-api.us-east-1.amazonaws.com/default/logout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),

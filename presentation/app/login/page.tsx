@@ -1,56 +1,57 @@
 'use client';
-
+ 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-
-
+import { useAuth } from '../context/AuthContext';
+ 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
-
+  const { setUser } = useAuth();
+ 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
-
+ 
     if (!email || !password) {
       setErrorMessage('Please fill in all fields');
       return;
     }
-
+ 
     setIsLoading(true);
-
+ 
     try {
       const res = await fetch('/api/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
+ 
       const data = await res.json();
-
+ 
       if (res.ok) {
         localStorage.setItem('sessionToken', data.sessionToken || '');
         localStorage.setItem('fullName', data.fullName || '');
-
-        if (data.sessionId) {
-          localStorage.setItem('sessionId', data.sessionId);
-        }
-
+        if (data.sessionId) localStorage.setItem('sessionId', data.sessionId);
+ 
+        // Update context immediately
+        setUser({ fullName: data.fullName, sessionToken: data.sessionToken, sessionId: data.sessionId });
+ 
         router.push('/');
       } else {
         setErrorMessage(data.message || 'Login failed');
       }
-    } catch (err) {
+    } catch {
       setErrorMessage('An error occurred during login');
     } finally {
       setIsLoading(false);
     }
   };
+ 
+
 
   return (
     <div style={styles.container}>
