@@ -171,7 +171,7 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      ExecutionRoleArn: arn:aws:iam::384191713250:role/LabRole
+      ExecutionRoleArn: arn:aws:iam::725118303207:role/LabRole
       ContainerDefinitions:
         - Name: sample-container
           Image: !Ref ImageUri
