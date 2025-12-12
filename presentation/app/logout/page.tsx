@@ -3,14 +3,20 @@
 import { useState } from 'react';
 
 export default function LogoutPage() {
-  const email = 'khoojiaxiang1@gmail.com'; // or get dynamically
-
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
     setLoading(true);
     setMessage('');
+
+    // Get email dynamically from localStorage
+    const email = localStorage.getItem('email') || localStorage.getItem('sessionToken');
+    if (!email) {
+      setMessage('No logged-in user found.');
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/logout', {
@@ -26,6 +32,12 @@ export default function LogoutPage() {
         throw new Error(errorData.error || 'Logout failed');
       }
 
+      // Clear localStorage after logout
+      localStorage.removeItem('email');
+      localStorage.removeItem('sessionToken');
+      localStorage.removeItem('fullName');
+      localStorage.removeItem('sessionId');
+
       setMessage('Logout successful! Session deleted.');
     } catch (error: any) {
       setMessage(`Error: ${error.message}`);
@@ -36,7 +48,7 @@ export default function LogoutPage() {
 
   return (
     <div className="p-6 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Logout Test</h1>
+      <h1 className="text-2xl font-bold mb-4">Logout</h1>
       <button
         onClick={handleLogout}
         disabled={loading}

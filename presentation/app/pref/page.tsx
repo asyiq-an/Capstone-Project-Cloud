@@ -14,7 +14,7 @@ export default async function ProfilePage() {
   }
 
   try {
-    const res = await fetch('https://gpuobwxek8.execute-api.us-east-1.amazonaws.com/checksession', {
+    const res = await fetch('https://lmhwf7frja.execute-api.us-east-1.amazonaws.com/default/checksession', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId }),

@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'np-snatch-image.s3.us-east-1.amazonaws.com',
+        hostname: 'np-snatch-image2.s3.us-east-1.amazonaws.com',
       },
     ],
   },

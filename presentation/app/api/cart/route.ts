@@ -12,7 +12,7 @@ export async function GET() {
 
   try {
     const sessionRes = await fetch(
-      "https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/checksession",
+      "https://lmhwf7frja.execute-api.us-east-1.amazonaws.com/default/checksession",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -28,7 +28,7 @@ export async function GET() {
     const email = user.email;
 
     const cartRes = await fetch(
-      `https://tkzemxdoli.execute-api.us-east-1.amazonaws.com/default/getcart?user_id=${email}`
+      `https://i763ia6cz2.execute-api.us-east-1.amazonaws.com/default/getcart?user_id=${email}`
     );
 
     if (!cartRes.ok) {
