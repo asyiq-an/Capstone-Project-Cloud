@@ -8,7 +8,7 @@ on:
 env:
   IMAGE_NAME: asyiqan/np-snatch
   AWS_REGION: us-east-1
-  AWS_ECR_REPO: 024196846829.dkr.ecr.us-east-1.amazonaws.com/asyiq-an/np-snatch
+  AWS_ECR_REPO: 725118303207.dkr.ecr.us-east-1.amazonaws.com/asyiq-an/np-snatch
   ECS_CLUSTER: alert-koala-5ffh6c
   ECS_TASK_DEFINITION: npsnatch
   CONTAINER_NAME: npsnatch
