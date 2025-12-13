@@ -13,7 +13,7 @@ const recosData: Record<string, { img: string; title: string; subtitle: string; 
       price: 3.5,
     },
     {
-      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/western-bites.jpg',
+      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/chicken-rice.jpg',
       title: 'Beef Quesadilla',
       subtitle: 'Mexican • Halal • $3.00',
       price: 3.0,
@@ -27,7 +27,7 @@ const recosData: Record<string, { img: string; title: string; subtitle: string; 
   ],
   'Food Club': [
     {
-      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/chicken-rice.jpg',
+      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/western-bites.jpg',
       title: 'Ayam Penyet',
       subtitle: 'Indonesian • Halal • $5.50',
       price: 5.5,
@@ -39,7 +39,7 @@ const recosData: Record<string, { img: string; title: string; subtitle: string; 
       price: 4.5,
     },
     {
-      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/korean-food.jpg',
+      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/malay-food.jpg',
       title: 'Bibimbap',
       subtitle: 'Korean Food • Non-Halal • $1.80',
       price: 1.8,
@@ -47,13 +47,13 @@ const recosData: Record<string, { img: string; title: string; subtitle: string; 
   ],
   'Munch': [
     {
-      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/korean-food.jpg',
+      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/chicken-rice.jpg',
       title: 'Bibimbap',
       subtitle: 'Korean • Halal • $4.80',
       price: 4.8,
     },
     {
-      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/chicken-rice.jpg',
+      img: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/malay-food.jpg',
       title: 'Roasted Chicken Rice',
       subtitle: 'Chicken Rice • Halal • $4.50',
       price: 4.5,

@@ -85,7 +85,7 @@ function PageContent() {
     'Healthy Smoothie Bowl Stall': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/healthy-smoothie-bowl-stall.jpg',
     'Salad Stop': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/salad-stop.jpg',
     'Fried Snacks Corner': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/fried-snacks-corner.jpg',
-    'Wraps n Rolls': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/salad-stop.jpg'
+    'Wraps n Rolls': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/wraps-rolls.jpg'
   };
 
   return (
