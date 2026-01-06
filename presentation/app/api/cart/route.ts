@@ -1,9 +1,8 @@
-
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const cookieStore = await cookies();  // await here!
+  const cookieStore = await cookies();
   const sessionId = cookieStore.get("sessionId")?.value;
 
   if (!sessionId) {
@@ -11,8 +10,9 @@ export async function GET() {
   }
 
   try {
+    // Check session and get user email
     const sessionRes = await fetch(
-      "https://lmhwf7frja.execute-api.us-east-1.amazonaws.com/default/checksession",
+      "https://bk0s9xd4h6.execute-api.us-east-1.amazonaws.com/default/checksession",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -27,8 +27,9 @@ export async function GET() {
     const user = await sessionRes.json();
     const email = user.email;
 
+    // Get cart from Lambda
     const cartRes = await fetch(
-      `https://i763ia6cz2.execute-api.us-east-1.amazonaws.com/default/getcart?user_id=${email}`
+      `https://mmrzcdgval.execute-api.us-east-1.amazonaws.com/default/getcart?user_id=${email}`
     );
 
     if (!cartRes.ok) {
@@ -38,10 +39,10 @@ export async function GET() {
     const cartJson = await cartRes.json();
     const cartData = typeof cartJson.body === "string" ? JSON.parse(cartJson.body) : cartJson;
 
-    return NextResponse.json({ cart: cartData.cart || [] });
+    // **Pass through Lambda data directly**
+    return NextResponse.json({ cart: cartData.cart });
   } catch (err) {
+    console.error("Failed to load cart:", err);
     return NextResponse.json({ error: "Failed to load cart" }, { status: 500 });
   }
 }
-
-// asyiq 

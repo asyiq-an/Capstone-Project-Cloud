@@ -26,20 +26,17 @@ export default function SharedHeader() {
           if (data.fullName) setFullName(data.fullName);
           if (data.email) {
             setSessionEmail(data.email);
-            localStorage.setItem('userEmail', data.email); // store for StallClient
+            localStorage.setItem('userEmail', data.email);
           }
         })
         .catch((err) => console.error('Session fetch failed:', err));
     } else {
-      // Clear any old stored email if no session
       localStorage.removeItem('userEmail');
     }
   }, []);
 
-   const handleLogoClick = () => {
-    // Clear context
+  const handleLogoClick = () => {
     setSelectedCafe('');
-    // Go to clean home page without params
     router.push('/');
   };
 
@@ -55,10 +52,10 @@ export default function SharedHeader() {
 
       localStorage.removeItem('sessionId');
       localStorage.removeItem('fullName');
-      localStorage.removeItem('userEmail'); // clear stored email
+      localStorage.removeItem('userEmail');
       setFullName('');
       setSessionEmail('');
-      router.push('/'); // redirect to home on logout
+      router.push('/');
     } catch (err) {
       console.error('Logout error:', err);
     }
@@ -66,19 +63,20 @@ export default function SharedHeader() {
 
   return (
     <header className="flex items-center justify-between bg-white shadow p-4 border-b border-gray-200 text-sm">
-      <Link href="/">
-        <div className="flex items-center gap-2 cursor-pointer"
-             onClick={handleLogoClick}
-        >
-          <Image
-            src="/Np-Snatch-Logo.png"
-            alt="NP Snatch Logo"
-            width={40}
-            height={40}
-            className="rounded"
-          />
-          <span className="text-xl font-bold text-pink-600">NP Snatch v3</span>
-        </div>
+      {/* Logo */}
+      <Link
+        href="/"
+        onClick={handleLogoClick}
+        className="flex items-center gap-2 cursor-pointer"
+      >
+        <Image
+          src="/Np-Snatch-Logo.png"
+          alt="NP Snatch Logo"
+          width={40}
+          height={40}
+          className="rounded"
+        />
+        <span className="text-xl font-bold text-pink-600">NP Snatch v3</span>
       </Link>
 
       <div className="flex items-center gap-4">
@@ -88,16 +86,18 @@ export default function SharedHeader() {
               Welcome, {fullName}
             </span>
 
-            <Link href="/cart">
-              <button className="border border-gray-400 px-4 py-1 rounded hover:bg-gray-100">
-                Cart
-              </button>
+            <Link
+              href="/cart"
+              className="border border-gray-400 px-4 py-1 rounded hover:bg-gray-100"
+            >
+              Cart
             </Link>
 
-            <Link href="/profile">
-              <button className="border border-gray-400 px-4 py-1 rounded hover:bg-gray-100">
-                Account
-              </button>
+            <Link
+              href="/profile"
+              className="border border-gray-400 px-4 py-1 rounded hover:bg-gray-100"
+            >
+              Account
             </Link>
 
             <button
@@ -109,15 +109,18 @@ export default function SharedHeader() {
           </>
         ) : (
           <>
-            <Link href="/login">
-              <button className="border border-gray-400 px-4 py-1 rounded hover:bg-gray-100">
-                Log in
-              </button>
+            <Link
+              href="/login"
+              className="border border-gray-400 px-4 py-1 rounded hover:bg-gray-100"
+            >
+              Log in
             </Link>
-            <Link href="/signup">
-              <button className="bg-pink-600 text-white px-4 py-1 rounded hover:bg-pink-700">
-                Sign up
-              </button>
+
+            <Link
+              href="/signup"
+              className="bg-pink-600 text-white px-4 py-1 rounded hover:bg-pink-700"
+            >
+              Sign up
             </Link>
           </>
         )}

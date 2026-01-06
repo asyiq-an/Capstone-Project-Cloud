@@ -1,31 +1,47 @@
-import { NextResponse } from 'next/server';
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const orderId = searchParams.get('order_id');
-
-  if (!orderId) {
-    return NextResponse.json({ error: 'Missing order_id' }, { status: 400 });
-  }
-
+export async function GET() {
   try {
-    const apiUrl = `https://hm6zuwet4k.execute-api.us-east-1.amazonaws.com/default/paymnet?order_id=${orderId}`; // Replace with your actual endpoint
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get("sessionId")?.value;
 
-    const lambdaResponse = await fetch(apiUrl);
-
-    if (!lambdaResponse.ok) {
-      return NextResponse.json(
-        { error: 'Failed to fetch from Lambda' },
-        { status: lambdaResponse.status }
-      );
+    if (!sessionId) {
+      return NextResponse.json({ error: "No session" }, { status: 401 });
     }
 
-    const data = await lambdaResponse.json();
-    return NextResponse.json({ items: data.items });
-  } catch (error) {
-    console.error('Error fetching paid items from Lambda:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    // Step 1: Verify session and get user email
+    const sessionRes = await fetch(
+      "https://bk0s9xd4h6.execute-api.us-east-1.amazonaws.com/default/checksession",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      }
+    );
+
+    if (!sessionRes.ok) {
+      return NextResponse.json({ error: "Session check failed" }, { status: 401 });
+    }
+
+    const user = await sessionRes.json();
+    const email = user.email;
+
+    // Step 2: Fetch cart items for this user from DynamoDB (via Lambda)
+    const cartRes = await fetch(
+      `https://mmrzcdgval.execute-api.us-east-1.amazonaws.com/default/getcart?user_id=${email}`
+    );
+
+    if (!cartRes.ok) {
+      return NextResponse.json({ error: "Failed to fetch cart" }, { status: 500 });
+    }
+
+    const cartJson = await cartRes.json();
+    const cartData = typeof cartJson.body === "string" ? JSON.parse(cartJson.body) : cartJson;
+
+    return NextResponse.json({ items: cartData.cart || [] });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Failed to load cart" }, { status: 500 });
   }
 }
-
-// asyiq

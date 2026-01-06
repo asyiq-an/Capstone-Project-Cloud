@@ -68,7 +68,7 @@ function PageContent() {
     'Drinks Stall': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/drinks-stall.jpg',
     'Malay Food': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/malay-food.jpg',
     'Western Bites': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/western-bites.jpg',
-    'Noodle Express': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/noodle-express.jpg',
+    'Noodle Express': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/western-bites.jpg',
     'Dessert Haven': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/dessert-haven.jpg',
     'Indonesian Food': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/indonesian-food.jpg',
     'Chicken Rice': 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/chicken-rice.jpg',

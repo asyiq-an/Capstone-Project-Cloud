@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
-    // ✅ MUST await cookies() in App Router
+    // 1️⃣ Read sessionId from cookie
     const cookieStore = await cookies();
     const sessionId = cookieStore.get("sessionId")?.value;
 
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No session" }, { status: 401 });
     }
 
-    // 1️⃣ Validate session & get user email
+    // 2️⃣ Validate session → get user email
     const sessionRes = await fetch(
       "https://bk0s9xd4h6.execute-api.us-east-1.amazonaws.com/default/checksession",
       {
@@ -35,40 +35,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2️⃣ Read cart items from request
-    const body = await req.json();
-    const cartItems = body.cartItems;
+    // 3️⃣ Read request body
+    const { cart_item_id, quantity } = await req.json();
 
-    if (!Array.isArray(cartItems) || cartItems.length === 0) {
-      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
+    if (!cart_item_id || quantity < 1) {
+      return NextResponse.json(
+        { error: "Invalid input" },
+        { status: 400 }
+      );
     }
 
-    // 3️⃣ Call checkout Lambda (ONLY place that writes to paiditems)
-    const apiRes = await fetch(
-      "https://uxm4l9tvmj.execute-api.us-east-1.amazonaws.com/default/checkout",
+    // 4️⃣ Call updatecart Lambda (MATCH TABLE CASE EXACTLY)
+    const res = await fetch(
+      "https://dc45aj7x56.execute-api.us-east-1.amazonaws.com/default/updatecart",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_email: email,
-          cartItems,
+          UserID: email,            // ✅ FIXED
+          CartItemID: cart_item_id, // ✅ FIXED
+          Quantity: quantity,       // ✅ FIXED
         }),
       }
     );
 
-    const text = await apiRes.text();
-
-    if (!apiRes.ok) {
-      console.error("Checkout Lambda error:", text);
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("updatecart Lambda error:", text);
       return NextResponse.json(
-        { error: "Checkout failed" },
-        { status: apiRes.status }
+        { error: "Failed to update cart" },
+        { status: 500 }
       );
     }
 
-    return NextResponse.json(JSON.parse(text));
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Checkout API error:", err);
+    console.error("updatecart API error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

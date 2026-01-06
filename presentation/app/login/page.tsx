@@ -114,7 +114,7 @@ export default function LoginForm() {
           </a>
         </p>
       </div>
-    </div>
+    </div> 
   );
 }
 

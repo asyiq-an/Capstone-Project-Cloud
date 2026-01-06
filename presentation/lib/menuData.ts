@@ -14,7 +14,7 @@ export const menuData: Record<string, MenuItem[]> = {
       description: 'Grilled tortilla with cheese and beef.',
       allergens: 'Contains dairy',
       price: '$5.50',
-      image: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/chicken-burrito.jpg',
+      image: 'https://np-snatch-v.s3.us-east-1.amazonaws.com/bef-quesadilla.jpg',
     },
   ],
 
@@ -58,7 +58,7 @@ export const menuData: Record<string, MenuItem[]> = {
       description: 'Fried smashed chicken served with sambal chili, and steamed rice.',
       allergens: 'Contains soy and chili',
       price: '$4.80',
-      image: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/beef-rendang.jpg',
+      image: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/ayam-penyet.jpg',
     },
     {
       name: 'Beef Rendang',
@@ -109,7 +109,7 @@ export const menuData: Record<string, MenuItem[]> = {
       description: 'A mixed rice dish with sautéed vegetables, egg, and spicy gochujang sauce.',
       allergens: 'Contains egg and sesame',
       price: '$5.80',
-      image: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/kimchi-jjigae.jpg',
+      image: 'https://np-snatch-image2.s3.us-east-1.amazonaws.com/bibimbap.jpg',
     },
     {
       name: 'Kimchi Jjigae',

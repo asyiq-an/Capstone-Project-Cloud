@@ -56,7 +56,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 const CHECK_SESSION_URL =
-  "https://lmhwf7frja.execute-api.us-east-1.amazonaws.com/default/checksession";
+  "https://bk0s9xd4h6.execute-api.us-east-1.amazonaws.com/default/checksession";
 const SAVE_PREFS_URL =
   "https://3foh5hnal5.execute-api.us-east-1.amazonaws.com/default/savepref";
 
