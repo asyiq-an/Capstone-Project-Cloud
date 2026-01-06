@@ -2,9 +2,20 @@
 
 import React, { useEffect, useState } from "react";
 
+type OrderItem = {
+  order_id: number;
+  order_id_prefix: string;
+  item_name: string;
+  quantity: number;
+  price: number;
+  pickup_time: string;
+  location: string;
+  special_request: string | null;
+};
+
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<OrderItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -14,7 +25,6 @@ export default function OrdersPage() {
     if (storedEmail) {
       setUserEmail(storedEmail);
     } else {
-      // If not present, you can prompt user or set a default
       const defaultEmail = "test@example.com";
       localStorage.setItem("user_email", defaultEmail);
       setUserEmail(defaultEmail);
@@ -25,24 +35,32 @@ export default function OrdersPage() {
   useEffect(() => {
     if (!userEmail) return;
 
-    async function fetchOrders() {
+    const email = userEmail; // 🔒 hard-narrow for TS
+
+    async function fetchOrders(): Promise<void> {
       setLoading(true);
       setError(null);
 
       try {
         const res = await fetch(
           `https://2sh7iqam3h.execute-api.us-east-1.amazonaws.com/default/getcode?user_id=${encodeURIComponent(
-            userEmail
+            email
           )}`
         );
+
         if (!res.ok) {
           const errData = await res.json();
           throw new Error(errData.error || "Failed to fetch orders");
         }
+
         const data = await res.json();
         setOrders(data.items || []);
-      } catch (err: any) {
-        setError(err.message || "Something went wrong");
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Something went wrong");
+        }
       } finally {
         setLoading(false);
       }
@@ -62,7 +80,7 @@ export default function OrdersPage() {
       <ul className="space-y-4">
         {orders.map((item) => (
           <li
-            key={item.order_id + item.item_name} // ensure unique key
+            key={item.order_id + item.item_name}
             className="bg-gray-100 p-4 rounded shadow flex flex-col space-y-2"
           >
             <div className="flex justify-between">
@@ -89,7 +107,8 @@ export default function OrdersPage() {
                 <strong>Location:</strong> {item.location}
               </p>
               <p>
-                <strong>Special Request:</strong> {item.special_request}
+                <strong>Special Request:</strong>{" "}
+                {item.special_request || "None"}
               </p>
             </div>
           </li>
