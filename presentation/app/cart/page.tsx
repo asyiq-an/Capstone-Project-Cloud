@@ -1,17 +1,27 @@
 "use client";
 
-
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
+type CartItem = {
+  cart_item_id: number;
+  name: string;
+  location: string;
+  pickup_time: string;
+  special_request: string | null;
+  price: number;
+  quantity: number;
+};
+
 export default function CartPage() {
   console.log("🚨 THIS CART PAGE IS RUNNING");
-  const [cartItems, setCartItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // 🔁 LOAD CART
-  const fetchCart = async () => {
+  const fetchCart = async (): Promise<void> => {
     try {
       const res = await fetch("/api/cart", {
         credentials: "include",
@@ -25,8 +35,12 @@ export default function CartPage() {
 
       const data = await res.json();
       setCartItems(data.cart || []);
-    } catch (err) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to load cart.");
+      }
     } finally {
       setLoading(false);
     }
@@ -37,7 +51,7 @@ export default function CartPage() {
   }, []);
 
   // 🔥 UPDATE QTY (BACKEND FIRST, THEN UI)
-  const updateQty = async (cartItemId, newQty) => {
+  const updateQty = async (cartItemId: number, newQty: number): Promise<void> => {
     console.log("🔥 updateQty called:", cartItemId, newQty);
 
     if (newQty < 1) return;
@@ -61,20 +75,20 @@ export default function CartPage() {
 
       // 🔁 REFRESH FROM DB (SOURCE OF TRUTH)
       await fetchCart();
-    } catch (err) {
+    } catch {
       alert("Error updating quantity");
     }
   };
 
-  const increaseQty = (item) => {
+  const increaseQty = (item: CartItem) => {
     updateQty(item.cart_item_id, item.quantity + 1);
   };
 
-  const decreaseQty = (item) => {
+  const decreaseQty = (item: CartItem) => {
     updateQty(item.cart_item_id, item.quantity - 1);
   };
 
-  const deleteItem = async (cartItemId) => {
+  const deleteItem = async (cartItemId: number): Promise<void> => {
     try {
       const res = await fetch("/api/deletecart", {
         method: "POST",
@@ -95,10 +109,10 @@ export default function CartPage() {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
+
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
-  // ✅ CHECKOUT DOES NOT WRITE DB
   const handleCheckout = () => {
     window.location.href = "/payment";
   };
@@ -196,4 +210,3 @@ export default function CartPage() {
     </div>
   );
 }
-
