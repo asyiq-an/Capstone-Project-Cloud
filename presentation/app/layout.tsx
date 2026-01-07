@@ -34,7 +34,6 @@ export default function RootLayout({
           <SharedHeader />
           
           {children}
-          < Chat />
           <BottomBar />
         </CafeteriaProvider>
       </body>

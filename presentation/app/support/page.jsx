@@ -144,16 +144,16 @@ const SupportPage = () => {
         </p>
         <div className="flex flex-col md:flex-row justify-center items-center space-y-3 md:space-y-0 md:space-x-6">
           <a
-            href="mailto:support@yourapp.com"
+            href="/storeview?AN"
             className="w-full md:w-auto bg-white text-red-700 font-bold py-2.5 px-6 sm:py-3 sm:px-8 rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
             Email Us
           </a>
           <a
-            href="tel:+6561234567"
+            href="tel:+65 8789 9915"
             className="w-full md:w-auto bg-white text-red-700 font-bold py-2.5 px-6 sm:py-3 sm:px-8 rounded-full shadow-lg hover:bg-gray-100 hover:scale-105 transition-all duration-300 flex items-center justify-center text-sm sm:text-base"
           >
-            Call Hotline: +65 6123 4567
+            Call Hotline: +65 8789 9915
           </a>
         </div>
         <p className="text-sm sm:text-base opacity-90 mt-5">
