@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { CafeteriaProvider } from './context/CafeteriaContext'; // adjust if needed
 import SharedHeader from './components/SharedHeader';
-import Chat from "./components/chat";
 import BottomBar from "./components/BottomBar";
 
 
